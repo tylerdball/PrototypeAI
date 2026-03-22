@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PrototypeAI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0f0a;
+      --surface: #111811;
+      --surface2: #182018;
+      --border: rgba(255,255,255,0.08);
+      --muted: #6b7280;
+      --text: #e5e7eb;
+      --brand: #10b981;
+      --brand-dim: rgba(16,185,129,0.12);
+      --yellow: #fbbf24;
+      --yellow-dim: rgba(251,191,36,0.1);
+      --red: #f87171;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header .logo { font-size: 22px; }
+    header h1 { font-size: 18px; font-weight: 700; color: #fff; }
+    header .tagline { font-size: 13px; color: var(--muted); margin-left: 4px; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
+
+    .hero {
+      padding: 52px 0 36px;
+    }
+    .hero h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 540px;
+      line-height: 1.6;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .card:hover { border-color: rgba(255,255,255,0.15); background: var(--surface2); }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .card-title { font-size: 15px; font-weight: 600; color: #fff; }
+    .card-number { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-done { background: var(--brand-dim); color: var(--brand); border: 1px solid rgba(16,185,129,0.2); }
+    .badge-planned { background: rgba(107,114,128,0.12); color: var(--muted); border: 1px solid rgba(107,114,128,0.2); }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-ports {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .port-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text);
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .port-link:hover { border-color: var(--brand); color: var(--brand); }
+    .port-link .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .stack-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .card.planned { opacity: 0.55; }
+    .card.planned:hover { opacity: 0.75; }
+
+    .start-hint {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 48px;
+    }
+    .start-hint h3 { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 12px; }
+    .start-hint pre {
+      font-family: "Fira Code", "Cascadia Code", Consolas, monospace;
+      font-size: 12px;
+      color: var(--brand);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      line-height: 1.8;
+    }
+    .start-hint .comment { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="logo">⚡</span>
+    <h1>PrototypeAI</h1>
+    <span class="tagline">Rapid-prototyping workspace — AI-powered web apps &amp; tools</span>
+  </header>
+
+  <div class="container">
+    <div class="hero">
+      <h2>Prototypes</h2>
+      <p>Each prototype is a self-contained app. Start the backend and frontend for the one you want, then open the link below.</p>
+    </div>
+
+    <p class="section-label">Complete</p>
+    <div class="grid">
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">AI Learning Dashboard</div>
+            <div class="card-number">ai-learning-dashboard/</div>
+          </div>
+          <span class="badge badge-done">✓ Complete</span>
+        </div>
+        <p class="card-desc">
+          Interactive modules covering LLMs, RAG pipelines, model drift, MLOps, prompt engineering, guardrails, fine-tuning vs RAG, and evals. Live playgrounds powered by local Ollama.
+        </p>
+        <div class="stack-tags">
+          <span class="tag">Next.js</span>
+          <span class="tag">FastAPI</span>
+          <span class="tag">Ollama</span>
+          <span class="tag">ChromaDB-free RAG</span>
+        </div>
+        <div class="card-ports">
+          <a class="port-link" href="http://localhost:3000" target="_blank">
+            <span class="dot"></span> Frontend :3000
+          </a>
+          <a class="port-link" href="http://localhost:8000/docs" target="_blank">
+            <span class="dot"></span> API Docs :8000
+          </a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">AI Prioritization Tool</div>
+            <div class="card-number">ai-prioritization-tool/</div>
+          </div>
+          <span class="badge badge-done">✓ Complete</span>
+        </div>
+        <p class="card-desc">
+          Paste a backlog, define strategic criteria, and let the LLM score and rank each item with reasoning. Supports org context injection and CSV export. Per-item parallel scoring with a live progress bar.
+        </p>
+        <div class="stack-tags">
+          <span class="tag">Next.js</span>
+          <span class="tag">FastAPI</span>
+          <span class="tag">Ollama</span>
+        </div>
+        <div class="card-ports">
+          <a class="port-link" href="http://localhost:3001" target="_blank">
+            <span class="dot"></span> Frontend :3001
+          </a>
+          <a class="port-link" href="http://localhost:8001/docs" target="_blank">
+            <span class="dot"></span> API Docs :8001
+          </a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">MCP Explorer</div>
+            <div class="card-number">mcp-explorer/</div>
+          </div>
+          <span class="badge badge-done">✓ Complete</span>
+        </div>
+        <p class="card-desc">
+          Learn, browse, and build Model Context Protocol servers. Three tabs: concept explainer, live tool runner against pre-built servers, and a wizard to generate + test your own FastMCP server.
+        </p>
+        <div class="stack-tags">
+          <span class="tag">Next.js</span>
+          <span class="tag">FastAPI</span>
+          <span class="tag">MCP SDK</span>
+          <span class="tag">FastMCP</span>
+        </div>
+        <div class="card-ports">
+          <a class="port-link" href="http://localhost:3002" target="_blank">
+            <span class="dot"></span> Frontend :3002
+          </a>
+          <a class="port-link" href="http://localhost:8002/docs" target="_blank">
+            <span class="dot"></span> API Docs :8002
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="section-label">Planned</p>
+    <div class="grid">
+
+      <div class="card planned">
+        <div class="card-header">
+          <div>
+            <div class="card-title">API Governance Dashboard</div>
+            <div class="card-number">#1</div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </div>
+        <p class="card-desc">Visualise an API inventory across teams — endpoints, owners, versions, deprecation timelines. AI drafts deprecation notices from diffs.</p>
+        <div class="stack-tags">
+          <span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">SQLite</span>
+        </div>
+      </div>
+
+      <div class="card planned">
+        <div class="card-header">
+          <div>
+            <div class="card-title">ADR Tracker</div>
+            <div class="card-number">#3</div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </div>
+        <p class="card-desc">Store Architecture Decision Records. AI generates both a technical summary and a plain-English business impact view. RAG over your ADR history.</p>
+        <div class="stack-tags">
+          <span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">RAG</span>
+        </div>
+      </div>
+
+      <div class="card planned">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Data Platform Observability</div>
+            <div class="card-number">#4</div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </div>
+        <p class="card-desc">Dataset catalog with ownership, SLOs, and pipeline health. Natural language query interface — ask "which datasets have no SLO?".</p>
+        <div class="stack-tags">
+          <span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">pandas</span>
+        </div>
+      </div>
+
+      <div class="card planned">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Synthetic Data Generator</div>
+            <div class="card-number">#5</div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </div>
+        <p class="card-desc">Define a schema, generate N rows of realistic synthetic data. Persona mode for user data. CSV/JSON export. Critical for AI pipelines without prod data.</p>
+        <div class="stack-tags">
+          <span class="tag">FastAPI</span><span class="tag">Pydantic</span><span class="tag">Ollama</span>
+        </div>
+      </div>
+
+      <div class="card planned">
+        <div class="card-header">
+          <div>
+            <div class="card-title">AI UX Review Tool</div>
+            <div class="card-number">#6</div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </div>
+        <p class="card-desc">Paste a screenshot or describe a UI. Runs a structured Nielsen heuristic evaluation and returns a scored report with specific improvement suggestions.</p>
+        <div class="stack-tags">
+          <span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">Claude Vision</span>
+        </div>
+      </div>
+
+      <div class="card planned">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Personal Interest Tracker</div>
+            <div class="card-number">#7</div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </div>
+        <p class="card-desc">Hub for music, D&amp;D, books, workouts. AI weekly digest, D&amp;D session recap generator, music mood recommendations.</p>
+        <div class="stack-tags">
+          <span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">SQLite</span>
+        </div>
+      </div>
+
+      <div class="card planned">
+        <div class="card-header">
+          <div>
+            <div class="card-title">D&amp;D Campaign Assistant</div>
+            <div class="card-number">#8</div>
+          </div>
+          <span class="badge badge-planned">Planned</span>
+        </div>
+        <p class="card-desc">NPC generator, encounter builder, session notes summariser. RAG over campaign notes — ask "what did the party promise the blacksmith?".</p>
+        <div class="stack-tags">
+          <span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">RAG</span><span class="tag">Ollama</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="start-hint">
+      <h3>Starting a prototype</h3>
+      <pre><span class="comment"># Start all at once (Windows)</span>
+start-all.bat
+
+<span class="comment"># Or start one individually</span>
+cd ai-learning-dashboard\backend  &amp;&amp;  uvicorn main:app --reload --port 8000
+cd ai-learning-dashboard\frontend &amp;&amp;  npm run dev
+
+cd ai-prioritization-tool\backend  &amp;&amp;  uvicorn main:app --reload --port 8001
+cd ai-prioritization-tool\frontend &amp;&amp;  npm run dev
+
+cd mcp-explorer\backend  &amp;&amp;  uvicorn main:app --reload --port 8002
+cd mcp-explorer\frontend &amp;&amp;  npm run dev</pre>
+    </div>
+  </div>
+</body>
+</html>
