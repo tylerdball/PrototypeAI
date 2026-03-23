@@ -74,6 +74,16 @@ AI layer: weekly digest summarising activity across interests, D&D session recap
 **Why:** Good excuse to build a multi-model, multi-entity data app. Covers CRUD, relationships, and AI summarisation in a context you'll actually use.
 **Stack:** Next.js, FastAPI, SQLite (multiple tables), Ollama for digests and D&D content.
 
+### 10. RACI Project Manager
+Interactive tool for building, tracking, and maintaining RACI matrices across projects and initiatives.
+Define projects with tasks/workstreams, assign R/A/C/I roles per person, and track completion status.
+AI layer suggests RACI assignments based on a task description and the team roster, flags missing accountabilities or overloaded owners, and drafts a stakeholder summary from the matrix.
+Reminder system: per-task due dates with a "what's due this week" digest view. Export to CSV or a shareable read-only view.
+**Why:** RACI is universally used in platform/data/PM work but usually lives in a spreadsheet that goes stale. This makes it interactive and auditable — directly relevant to running a team.
+**Stack:** Next.js, FastAPI, SQLite (projects → tasks → assignments), Ollama for AI suggestions and stakeholder summaries, date-based reminder logic.
+
+---
+
 ### 8. D&D Campaign AI Assistant
 Campaign manager with NPC generator (personality, backstory, secrets), encounter builder (party level → CR-appropriate enemies),
 and session notes summariser that extracts open plot threads and unresolved hooks.
@@ -97,3 +107,4 @@ RAG over your campaign notes so you can ask "what did the party promise the blac
 | 7 | Personal Interest Tracker | Not started |
 | 8 | D&D Campaign AI Assistant | Not started |
 | 9 | MCP Server Explorer & Learning Tool | ✅ Complete — `mcp-explorer/` |
+| 10 | RACI Project Manager | Not started |

@@ -1,8 +1,3 @@
-# Each prototype has its own git repo — exclude their internals here
-ai-learning-dashboard/
-ai-prioritization-tool/
-mcp-explorer/
-
 # OS
 .DS_Store
 Thumbs.db
@@ -17,6 +12,9 @@ __pycache__/
 *.pyc
 .venv/
 *.env
+tmp/
 
 # Node
 node_modules/
+.next/
+.turbo/
