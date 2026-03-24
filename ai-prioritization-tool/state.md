@@ -1,6 +1,8 @@
 # AI Prioritization Tool — State
 
-## Status: Complete — on GitHub at https://github.com/tylerdball/ai-prioritization-tool
+## Status: Functional but needs UI polish
+
+> **Note:** The frontend was rebuilt from scratch (March 2026) after source files were lost in a monorepo consolidation. The current UI is functional but noticeably less polished than the original — the look and feel needs work to match the quality of the other prototypes. Prioritise UI refinement before sharing this tool.
 
 ## What it does
 Score and rank a backlog of items against configurable strategic criteria using AI.
