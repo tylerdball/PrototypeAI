@@ -8,7 +8,11 @@
       "Bash(timeout 5 uvicorn main:app --port 8002)",
       "Bash(rm -rf \"E:/Projects/PrototypeAI/ai-learning-dashboard/.git\")",
       "Bash(rm -rf \"E:/Projects/PrototypeAI/ai-prioritization-tool/.git\")",
-      "Bash(rm -rf \"E:/Projects/PrototypeAI/mcp-explorer/.git\")"
+      "Bash(rm -rf \"E:/Projects/PrototypeAI/mcp-explorer/.git\")",
+      "Bash(head:*)",
+      "Bash(ls \"E:/Projects/PrototypeAI/dnd-assistant/frontend/\"*.env*)",
+      "Bash(npm list:*)",
+      "Bash(ls \"E:/Projects/PrototypeAI/ai-prioritization-tool/frontend/next.config\"*)"
     ]
   }
 }

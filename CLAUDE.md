@@ -35,12 +35,20 @@ When building AI features, use a provider-agnostic wrapper:
 - OpenAI-compatible: `openai` Python SDK (also works for Ollama with `base_url` override)
 - Keep model/provider config in environment variables (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `OLLAMA_BASE_URL`)
 
+## Shell Environment
+
+**Tyler uses PowerShell on Windows.** Always give shell commands in PowerShell syntax, not bash:
+- Use `Remove-Item -Recurse -Force` not `rm -rf`
+- Use `$env:VAR = "value"` not `export VAR=value`
+- Use backslashes or quoted forward slashes in paths where needed
+- Use `;` not `&&` to chain commands (or use separate lines)
+
 ## Common Commands
 
 These apply per-prototype depending on its stack:
 
 **Next.js prototype:**
-```bash
+```powershell
 npm install
 npm run dev       # start dev server
 npm run build     # production build
@@ -48,12 +56,19 @@ npm run lint      # ESLint
 ```
 
 **Python/FastAPI prototype:**
-```bash
+```powershell
 pip install -r requirements.txt   # or: uv sync
 uvicorn app:app --reload           # start dev server
 python main.py                     # for scripts
 pytest                             # run tests
 pytest tests/test_foo.py -k name   # run single test
+```
+
+**Clean reinstall (Next.js):**
+```powershell
+Remove-Item -Recurse -Force .next, node_modules
+npm install
+npm run dev
 ```
 
 ## New Prototype Checklist

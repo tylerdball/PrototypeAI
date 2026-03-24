@@ -105,6 +105,6 @@ RAG over your campaign notes so you can ask "what did the party promise the blac
 | 5 | Synthetic Data Generator | Not started |
 | 6 | AI UX Review Tool | Not started |
 | 7 | Personal Interest Tracker | Not started |
-| 8 | D&D Campaign AI Assistant | Not started |
+| 8 | D&D Campaign AI Assistant | ✅ Complete — `dnd-assistant/` |
 | 9 | MCP Server Explorer & Learning Tool | ✅ Complete — `mcp-explorer/` |
 | 10 | RACI Project Manager | Not started |
