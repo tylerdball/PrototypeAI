@@ -55,7 +55,7 @@ function SloBar({ target, current, unit }: { target: number; current: number | n
       <div className="flex-1 bg-[var(--border)] rounded-full h-1.5">
         <div className={clsx("h-1.5 rounded-full", ok ? "bg-emerald-500" : "bg-red-500")} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-xs font-mono text-[#e2eaf3] w-32 text-right">
+      <span className="text-xs font-mono text-[var(--text)] w-32 text-right">
         {current} / {target} {unit}
       </span>
     </div>
@@ -77,7 +77,7 @@ export default function DatasetPage() {
   return (
     <div className="max-w-4xl">
       <div className="flex items-center gap-3 mb-6">
-        <a href="/" className="text-[var(--muted)] hover:text-[#e2eaf3] transition-colors"><ArrowLeft size={20} /></a>
+        <a href="/" className="text-[var(--muted)] hover:text-[var(--text)] transition-colors"><ArrowLeft size={20} /></a>
         <div>
           <h1 className="text-xl font-mono font-bold text-brand-400">{dataset.name}</h1>
           <p className="text-sm text-[var(--muted)]">{dataset.description}</p>
@@ -97,7 +97,7 @@ export default function DatasetPage() {
           ].map(([label, value]) => (
             <div key={label}>
               <p className="text-xs text-[var(--muted)] mb-0.5">{label}</p>
-              <p className="text-[#e2eaf3]">{value}</p>
+              <p className="text-[var(--text)]">{value}</p>
             </div>
           ))}
         </div>
@@ -114,7 +114,7 @@ export default function DatasetPage() {
 
       {/* SLOs */}
       <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 mb-5">
-        <h2 className="font-semibold text-[#e2eaf3] mb-4">SLOs ({dataset.slos.length})</h2>
+        <h2 className="font-semibold text-[var(--text)] mb-4">SLOs ({dataset.slos.length})</h2>
         {dataset.slos.length === 0 ? (
           <p className="text-sm text-[var(--muted)]">No SLOs defined for this dataset.</p>
         ) : (
@@ -123,7 +123,7 @@ export default function DatasetPage() {
               <div key={slo.id}>
                 <div className="flex items-center gap-3 mb-1.5">
                   <StatusBadge status={slo.status} />
-                  <span className="text-sm font-medium text-[#e2eaf3] capitalize">{slo.slo_type}</span>
+                  <span className="text-sm font-medium text-[var(--text)] capitalize">{slo.slo_type}</span>
                   <span className="text-xs text-[var(--muted)]">{slo.description}</span>
                 </div>
                 <SloBar target={slo.target_value} current={slo.current_value} unit={slo.unit} />
@@ -135,7 +135,7 @@ export default function DatasetPage() {
 
       {/* Pipelines */}
       <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
-        <h2 className="font-semibold text-[#e2eaf3] mb-4">Pipelines ({dataset.pipelines.length})</h2>
+        <h2 className="font-semibold text-[var(--text)] mb-4">Pipelines ({dataset.pipelines.length})</h2>
         {dataset.pipelines.length === 0 ? (
           <p className="text-sm text-[var(--muted)]">No pipelines linked to this dataset.</p>
         ) : (
@@ -144,12 +144,12 @@ export default function DatasetPage() {
               <div key={p.id} className="border border-[var(--border)] rounded-lg p-4">
                 <div className="flex items-center gap-3 mb-2">
                   <StatusBadge status={p.status} />
-                  <span className="font-mono text-sm text-[#e2eaf3]">{p.name}</span>
+                  <span className="font-mono text-sm text-[var(--text)]">{p.name}</span>
                   <span className="text-xs text-[var(--muted)] ml-auto">{p.schedule}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-3 text-xs text-[var(--muted)]">
-                  <div><span className="block">Owner</span><span className="text-[#e2eaf3]">{p.owner_team}</span></div>
-                  <div><span className="block">Avg duration</span><span className="text-[#e2eaf3]">{p.avg_duration_mins} min</span></div>
+                  <div><span className="block">Owner</span><span className="text-[var(--text)]">{p.owner_team}</span></div>
+                  <div><span className="block">Avg duration</span><span className="text-[var(--text)]">{p.avg_duration_mins} min</span></div>
                   <div><span className="block">7d success</span>
                     <span className={clsx("font-mono", (p.success_rate_7d ?? 0) >= 0.95 ? "text-emerald-400" : (p.success_rate_7d ?? 0) >= 0.8 ? "text-yellow-400" : "text-red-400")}>
                       {p.success_rate_7d != null ? `${Math.round(p.success_rate_7d * 100)}%` : "—"}
@@ -157,7 +157,7 @@ export default function DatasetPage() {
                   </div>
                 </div>
                 {p.error_message && (
-                  <div className="mt-3 p-2.5 bg-red-950/30 border border-red-800/50 rounded text-xs font-mono text-red-300">
+                  <div className="mt-3 p-2.5 bg-red-50 border border-red-200 rounded text-xs font-mono text-red-700">
                     {p.error_message}
                   </div>
                 )}

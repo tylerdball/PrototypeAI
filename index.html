@@ -254,6 +254,20 @@
           </div></td>
         </tr>
 
+        <tr>
+          <td><span class="dot-done"></span></td>
+          <td>
+            <div class="proto-name">Data Platform Observability</div>
+            <div class="proto-dir">data-platform-observability/</div>
+          </td>
+          <td><p class="proto-desc">Dataset catalog with ownership, SLOs, and pipeline health indicators. Natural language query — "which datasets owned by team X have failing SLOs?".</p></td>
+          <td><div class="tags"><span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">pandas</span><span class="tag">SQLite</span><span class="tag">Ollama</span></div></td>
+          <td><div class="ports">
+            <a class="port-link" href="http://localhost:3005" target="_blank">:3005</a>
+            <a class="port-link" href="http://localhost:8005/docs" target="_blank">API :8005</a>
+          </div></td>
+        </tr>
+
       </tbody>
     </table>
 
@@ -280,17 +294,6 @@
           </td>
           <td><p class="proto-desc">Store Architecture Decision Records. AI generates technical summary + plain-English business impact. RAG over ADR history.</p></td>
           <td><div class="tags"><span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">RAG</span></div></td>
-          <td></td>
-        </tr>
-
-        <tr class="planned">
-          <td><span class="dot-planned"></span></td>
-          <td>
-            <div class="proto-name">Data Platform Observability</div>
-            <div class="proto-dir">#4</div>
-          </td>
-          <td><p class="proto-desc">Dataset catalog with ownership, SLOs, and pipeline health. Natural language query interface — "which datasets have no SLO?".</p></td>
-          <td><div class="tags"><span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">pandas</span></div></td>
           <td></td>
         </tr>
 
@@ -347,7 +350,10 @@ cd dnd-assistant\backend  &amp;&amp;  uvicorn main:app --reload --port 8003
 cd dnd-assistant\frontend &amp;&amp;  npm run dev
 
 cd raci-project-manager\backend  &amp;&amp;  uvicorn main:app --reload --port 8004
-cd raci-project-manager\frontend &amp;&amp;  npm run dev</pre>
+cd raci-project-manager\frontend &amp;&amp;  npm run dev
+
+cd data-platform-observability\backend  &amp;&amp;  uvicorn main:app --reload --port 8005
+cd data-platform-observability\frontend &amp;&amp;  npm run dev</pre>
     </div>
   </div>
 </body>

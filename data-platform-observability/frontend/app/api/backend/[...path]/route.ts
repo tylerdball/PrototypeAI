@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 
-const BACKEND = "http://127.0.0.1:8004";
+const BACKEND = "http://127.0.0.1:8005";
 
 async function handler(req: NextRequest, { params }: { params: { path: string[] } }) {
   const path = params.path.join("/");

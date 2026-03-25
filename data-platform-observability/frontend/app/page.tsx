@@ -59,8 +59,8 @@ interface Meta {
 function SummaryCard({ icon, label, value, sub, variant = "neutral" }: {
   icon: React.ReactNode; label: string; value: number | string; sub?: string; variant?: "good" | "warn" | "bad" | "neutral";
 }) {
-  const border = { good: "border-emerald-700/50", warn: "border-yellow-700/50", bad: "border-red-700/50", neutral: "border-[var(--border)]" }[variant];
-  const text = { good: "text-emerald-400", warn: "text-yellow-400", bad: "text-red-400", neutral: "text-brand-400" }[variant];
+  const border = { good: "border-emerald-200", warn: "border-yellow-200", bad: "border-red-200", neutral: "border-[var(--border)]" }[variant];
+  const text = { good: "text-emerald-600", warn: "text-amber-600", bad: "text-red-600", neutral: "text-brand-500" }[variant];
   return (
     <div className={clsx("bg-[var(--surface)] border rounded-xl p-4", border)}>
       <div className="flex items-center gap-2 mb-2 text-[var(--muted)]">{icon}<span className="text-xs uppercase tracking-wide">{label}</span></div>
@@ -80,7 +80,7 @@ function PipelineRow({ p }: { p: Pipeline }) {
       <button onClick={() => setOpen(v => !v)}
         className="w-full flex items-center gap-4 px-4 py-3 bg-[var(--surface)] hover:bg-[var(--surface2)] transition-colors text-left">
         <StatusBadge status={p.status} />
-        <span className="font-mono text-sm text-[#e2eaf3] flex-1">{p.name}</span>
+        <span className="font-mono text-sm text-[var(--text)] flex-1">{p.name}</span>
         <span className="text-xs text-[var(--muted)] hidden md:block">{p.dataset_name}</span>
         <span className="text-xs text-[var(--muted)] hidden lg:block">{p.schedule}</span>
         {successPct != null && (
@@ -91,7 +91,7 @@ function PipelineRow({ p }: { p: Pipeline }) {
         <span className="text-xs text-[var(--muted)]">{p.owner_team}</span>
       </button>
       {open && p.error_message && (
-        <div className="px-4 py-3 border-t border-[var(--border)] bg-red-950/30">
+        <div className="px-4 py-3 border-t border-[var(--border)] bg-red-50">
           <p className="text-xs font-mono text-red-300">{p.error_message}</p>
         </div>
       )}
@@ -129,18 +129,18 @@ function NLQueryBar({ onResults }: { onResults: (r: { results: Dataset[]; explan
     <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
       <div className="flex items-center gap-2 mb-3">
         <Zap size={16} className="text-brand-400" />
-        <span className="font-semibold text-[#e2eaf3]">Natural Language Query</span>
+        <span className="font-semibold text-[var(--text)]">Natural Language Query</span>
       </div>
       <div className="flex gap-2">
         <input value={q} onChange={e => setQ(e.target.value)}
           onKeyDown={e => e.key === "Enter" && run(q)}
           placeholder="e.g. Which datasets owned by team X have no SLO defined?"
-          className="flex-1 bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm text-[#e2eaf3] placeholder-[var(--muted)] focus:outline-none focus:border-brand-400" />
+          className="flex-1 bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-brand-400" />
         <button onClick={() => run(q)} disabled={loading || !q.trim()}
           className="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors">
           {loading ? "Querying…" : "Ask"}
         </button>
-        {q && <button onClick={() => { setQ(""); onResults(null); }} className="px-3 text-[var(--muted)] hover:text-[#e2eaf3] transition-colors text-sm">Clear</button>}
+        {q && <button onClick={() => { setQ(""); onResults(null); }} className="px-3 text-[var(--muted)] hover:text-[var(--text)] transition-colors text-sm">Clear</button>}
       </div>
       <div className="flex gap-2 mt-2 flex-wrap">
         {EXAMPLES.map(ex => (
@@ -224,13 +224,13 @@ export default function Home() {
       <NLQueryBar onResults={setNlResults} />
 
       {nlResults && (
-        <div className="bg-brand-500/10 border border-brand-500/30 rounded-xl px-5 py-3 flex items-center justify-between">
+        <div className="bg-sky-50 border border-sky-200 rounded-xl px-5 py-3 flex items-center justify-between">
           <div>
-            <p className="text-sm text-brand-300">{nlResults.explanation}</p>
+            <p className="text-sm text-brand-600">{nlResults.explanation}</p>
             <p className="text-xs text-[var(--muted)] mt-0.5">{nlResults.count} result{nlResults.count !== 1 ? "s" : ""} — showing in {nlResults.entity} tab</p>
           </div>
           <button onClick={() => { setNlResults(null); setTab(nlResults.entity === "pipelines" ? "pipelines" : "catalog"); }}
-            className="text-xs text-[var(--muted)] hover:text-[#e2eaf3] transition-colors">
+            className="text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors">
             Clear ×
           </button>
         </div>
@@ -242,7 +242,7 @@ export default function Home() {
           {([["catalog", "Dataset Catalog"], ["pipelines", "Pipeline Health"]] as [Tab, string][]).map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
               className={clsx("px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px",
-                tab === key ? "border-brand-400 text-brand-400" : "border-transparent text-[var(--muted)] hover:text-[#e2eaf3]")}>
+                tab === key ? "border-brand-400 text-brand-400" : "border-transparent text-[var(--muted)] hover:text-[var(--text)]")}>
               {label}
             </button>
           ))}
@@ -255,20 +255,20 @@ export default function Home() {
               <div className="relative flex-1 min-w-48">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search datasets…"
-                  className="w-full pl-8 pr-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[#e2eaf3] placeholder-[var(--muted)] focus:outline-none focus:border-brand-400" />
+                  className="w-full pl-8 pr-3 py-2 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-brand-400" />
               </div>
               <select value={domainFilter} onChange={e => setDomainFilter(e.target.value)}
-                className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#e2eaf3] focus:outline-none focus:border-brand-400">
+                className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:border-brand-400">
                 <option value="">All domains</option>
                 {meta.domains.map(d => <option key={d} value={d}>{d}</option>)}
               </select>
               <select value={teamFilter} onChange={e => setTeamFilter(e.target.value)}
-                className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#e2eaf3] focus:outline-none focus:border-brand-400">
+                className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:border-brand-400">
                 <option value="">All teams</option>
                 {meta.teams.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
               <select value={sloFilter} onChange={e => setSloFilter(e.target.value)}
-                className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#e2eaf3] focus:outline-none focus:border-brand-400">
+                className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:border-brand-400">
                 <option value="">All SLO states</option>
                 <option value="failing">Has failing SLOs</option>
                 <option value="warning">Has warnings</option>
@@ -276,7 +276,7 @@ export default function Home() {
                 <option value="none">No SLOs defined</option>
               </select>
               <select value={pipelineFilter} onChange={e => setPipelineFilter(e.target.value)}
-                className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[#e2eaf3] focus:outline-none focus:border-brand-400">
+                className="bg-[var(--surface)] border border-[var(--border)] rounded-lg px-3 py-2 text-sm text-[var(--text)] focus:outline-none focus:border-brand-400">
                 <option value="">All pipeline states</option>
                 <option value="failed">Has failed pipeline</option>
                 <option value="degraded">Has degraded pipeline</option>
@@ -304,7 +304,7 @@ export default function Home() {
                       </td>
                       <td className="px-4 py-3 text-xs text-[var(--muted)] capitalize">{d.domain}</td>
                       <td className="px-4 py-3">
-                        <div className="text-xs text-[#e2eaf3]">{d.owner_team || <span className="text-red-400">Unowned</span>}</div>
+                        <div className="text-xs text-[var(--text)]">{d.owner_team || <span className="text-red-400">Unowned</span>}</div>
                         {d.owner_person && <div className="text-xs text-[var(--muted)]">{d.owner_person}</div>}
                       </td>
                       <td className="px-4 py-3 text-xs text-[var(--muted)]">{d.source_system}</td>

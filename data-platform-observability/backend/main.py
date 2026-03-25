@@ -9,7 +9,7 @@ app = FastAPI(title="Data Platform Observability")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3004"],
+    allow_origins=["http://localhost:3005"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

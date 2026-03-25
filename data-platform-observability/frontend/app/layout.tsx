@@ -10,7 +10,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="min-h-screen font-sans antialiased">
-        <nav className="border-b border-[var(--border)] bg-[var(--surface)] px-6 py-3 flex items-center gap-3">
+        <nav className="border-b border-[var(--border)] bg-white px-6 py-3 flex items-center gap-3 shadow-sm">
           <a href="/" className="text-lg font-bold text-brand-400 tracking-tight hover:text-brand-500 transition-colors">
             Data Platform Observability
           </a>
