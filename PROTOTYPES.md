@@ -101,7 +101,7 @@ RAG over your campaign notes so you can ask "what did the party promise the blac
 | 2 | AI-Assisted Prioritization Tool | ✅ Complete — `ai-prioritization-tool/` |
 | 1 | API Governance Dashboard | Not started |
 | 3 | ADR Tracker | Not started |
-| 4 | Data Platform Observability Dashboard | Not started |
+| 4 | Data Platform Observability Dashboard | ✅ Complete — `data-platform-observability/` |
 | 5 | Synthetic Data Generator | Not started |
 | 6 | AI UX Review Tool | Not started |
 | 7 | Personal Interest Tracker | Not started |
