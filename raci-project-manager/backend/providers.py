@@ -49,7 +49,7 @@ async def complete(
         kwargs["response_format"] = {"type": "json_object"}
 
     response = await client.chat.completions.create(
-        model=model or ("llama3.2:3b" if PROVIDER == "ollama" else "gpt-4o-mini"),
+        model=model or ("llama3.1:8b" if PROVIDER == "ollama" else "gpt-4o-mini"),
         max_tokens=max_tokens,
         temperature=temperature,
         messages=[

@@ -12,7 +12,21 @@
       "Bash(head:*)",
       "Bash(ls \"E:/Projects/PrototypeAI/dnd-assistant/frontend/\"*.env*)",
       "Bash(npm list:*)",
-      "Bash(ls \"E:/Projects/PrototypeAI/ai-prioritization-tool/frontend/next.config\"*)"
+      "Bash(ls \"E:/Projects/PrototypeAI/ai-prioritization-tool/frontend/next.config\"*)",
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?|json\\)$\")",
+      "Bash(find /e/Projects/PrototypeAI/raci-project-manager/frontend -not -path */node_modules/* -not -path */.next/* -type f)",
+      "Bash(python3 -c \"import database; import routes.raci; print\\(''imports OK''\\)\")",
+      "Bash(ls /c/Python*)",
+      "Read(//c/Users/Admin/AppData/Local/Programs//**)",
+      "Bash(py -c \"import sys; sys.path.insert\\(0, ''.''\\); import database; import routes.raci; print\\(''imports OK''\\)\")",
+      "Bash(npx tsc:*)",
+      "Bash(python3:*)",
+      "Bash(ls /c/Users/Admin/AppData/Local/Programs/Python/*/python.exe)",
+      "Bash(/c/Users/Admin/AppData/Local/Programs/Python/Python313/python.exe generators/factory.py)",
+      "Bash(command -v py.exe)",
+      "Bash(py --version)",
+      "Bash(py -m pip install -r \"E:/Projects/PrototypeAI/synthetic-data-generator/requirements.txt\" -q)",
+      "Bash(py -m pytest tests/ -v)"
     ]
   }
 }

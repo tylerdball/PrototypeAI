@@ -18,6 +18,10 @@ export default function HomePage() {
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ name: "", description: "" });
 
+  const [templateForm, setTemplateForm] = useState({ project_type: "", description: "" });
+  const [generatingTemplate, setGeneratingTemplate] = useState(false);
+  const [templateMode, setTemplateMode] = useState<"fresh" | "existing">("fresh");
+
   async function load() {
     setLoading(true);
     const res = await fetch("/api/backend/projects");
@@ -43,6 +47,25 @@ export default function HomePage() {
     router.push(`/project/${created.id}`);
   }
 
+  async function createFromTemplate(e: React.FormEvent) {
+    e.preventDefault();
+    if (!templateForm.project_type.trim()) return;
+    setGeneratingTemplate(true);
+    const endpoint =
+      templateMode === "existing" && projects.length > 0
+        ? "/api/backend/ai/suggest-from-existing"
+        : "/api/backend/ai/generate-template";
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(templateForm),
+    });
+    setGeneratingTemplate(false);
+    if (!res.ok) return;
+    const created = await res.json();
+    router.push(`/project/${created.project_id}`);
+  }
+
   async function deleteProject(id: number, e: React.MouseEvent) {
     e.stopPropagation();
     if (!confirm("Delete this project and all tasks/assignments?")) return;
@@ -59,26 +82,79 @@ export default function HomePage() {
         </div>
       </div>
 
-      <form onSubmit={createProject} className="card space-y-3">
-        <h2 className="font-semibold">New Project</h2>
-        <input
-          className="input"
-          placeholder="Project name"
-          value={form.name}
-          onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-          required
-        />
-        <textarea
-          className="input"
-          placeholder="Description"
-          value={form.description}
-          onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-          rows={3}
-        />
-        <button className="btn btn-primary" disabled={creating}>
-          {creating ? "Creating..." : "Create Project"}
-        </button>
-      </form>
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Manual create */}
+        <form onSubmit={createProject} className="card space-y-3">
+          <h2 className="font-semibold">New Project</h2>
+          <input
+            className="input"
+            placeholder="Project name"
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            required
+          />
+          <textarea
+            className="input"
+            placeholder="Description"
+            value={form.description}
+            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+            rows={3}
+          />
+          <button className="btn btn-primary" disabled={creating}>
+            {creating ? "Creating..." : "Create Project"}
+          </button>
+        </form>
+
+        {/* AI template create */}
+        <form onSubmit={createFromTemplate} className="card space-y-3">
+          <h2 className="font-semibold">Create from AI Template</h2>
+          <p className="text-xs text-[var(--muted)]">
+            Describe what kind of project this is. AI will generate groups and tasks to get you
+            started.
+          </p>
+          <input
+            className="input"
+            placeholder="Project type (e.g. Product launch, Office relocation)"
+            value={templateForm.project_type}
+            onChange={(e) => setTemplateForm((f) => ({ ...f, project_type: e.target.value }))}
+            required
+          />
+          <textarea
+            className="input"
+            placeholder="Additional context (optional)"
+            value={templateForm.description}
+            onChange={(e) => setTemplateForm((f) => ({ ...f, description: e.target.value }))}
+            rows={2}
+          />
+
+          {projects.length > 0 && (
+            <div className="flex gap-3 text-sm">
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="radio"
+                  name="tmode"
+                  checked={templateMode === "fresh"}
+                  onChange={() => setTemplateMode("fresh")}
+                />
+                <span>Fresh template</span>
+              </label>
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="radio"
+                  name="tmode"
+                  checked={templateMode === "existing"}
+                  onChange={() => setTemplateMode("existing")}
+                />
+                <span>Learn from existing projects</span>
+              </label>
+            </div>
+          )}
+
+          <button className="btn btn-primary" disabled={generatingTemplate}>
+            {generatingTemplate ? "Generating template…" : "Generate & Create Project"}
+          </button>
+        </form>
+      </div>
 
       <div className="card">
         <h2 className="mb-3 font-semibold">Existing Projects</h2>
@@ -97,7 +173,9 @@ export default function HomePage() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-medium text-white">{project.name}</h3>
-                    <p className="mt-1 text-xs text-[var(--muted)] line-clamp-2">{project.description || "No description"}</p>
+                    <p className="mt-1 text-xs text-[var(--muted)] line-clamp-2">
+                      {project.description || "No description"}
+                    </p>
                   </div>
                   <button className="btn btn-secondary" onClick={(e) => deleteProject(project.id, e)}>
                     Delete

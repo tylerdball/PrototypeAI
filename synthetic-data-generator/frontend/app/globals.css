@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    background: #07080c;
+    color: #c9d1d9;
+  }
+}
+
+@layer components {
+  .constraint-input {
+    @apply bg-[#07080c] border border-[#1c2438] text-zinc-400 text-xs px-2 py-1 rounded
+           focus:outline-none focus:border-amber-500/50 transition-colors placeholder-zinc-700;
+  }
+}
+
+/* Thin scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1c2438; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #2a3550; }
+
+/* Date input styling on dark bg */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.3);
+}

@@ -107,4 +107,4 @@ RAG over your campaign notes so you can ask "what did the party promise the blac
 | 7 | Personal Interest Tracker | Not started |
 | 8 | D&D Campaign AI Assistant | ✅ Complete — `dnd-assistant/` |
 | 9 | MCP Server Explorer & Learning Tool | ✅ Complete — `mcp-explorer/` |
-| 10 | RACI Project Manager | Not started |
+| 10 | RACI Project Manager | ✅ Complete — `raci-project-manager/` |

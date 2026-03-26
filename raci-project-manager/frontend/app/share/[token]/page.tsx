@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
 export default function SharePage() {
@@ -44,22 +44,55 @@ export default function SharePage() {
             <tr>
               <th className="px-2 py-2 text-left">Task</th>
               {data.people.map((p: any) => (
-                <th key={p.id} className="px-2 py-2 text-left">{p.name}</th>
+                <th key={`ph-${p.id}`} className="px-2 py-2 text-left text-xs">{p.name}</th>
+              ))}
+              {(data.teams || []).map((t: any) => (
+                <th key={`th-${t.id}`} className="px-2 py-2 text-left text-xs text-[var(--muted)] italic">{t.name}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {data.tasks.map((task: any) => (
-              <tr key={task.id} className="border-t border-[var(--border)]">
-                <td className="px-2 py-2">
-                  <div className="font-medium">{task.title}</div>
-                  <div className="text-xs text-[var(--muted)]">{task.status} | due {task.due_date || "-"}</div>
-                </td>
-                {data.people.map((person: any) => (
-                  <td key={person.id} className="px-2 py-2">{task.role_by_person?.[String(person.id)] || "-"}</td>
-                ))}
-              </tr>
-            ))}
+            {(() => {
+              let lastGroupId: number | null = undefined as any;
+              const rows: React.ReactNode[] = [];
+              const colCount = 1 + data.people.length + (data.teams || []).length;
+              for (const task of data.tasks) {
+                if (task.group_id !== lastGroupId) {
+                  lastGroupId = task.group_id;
+                  if (task.group_name) {
+                    rows.push(
+                      <tr key={`gh-${task.group_id}`}>
+                        <td
+                          colSpan={colCount}
+                          className="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-brand-500 bg-brand-500/5"
+                        >
+                          {task.group_name}
+                        </td>
+                      </tr>
+                    );
+                  }
+                }
+                rows.push(
+                  <tr key={task.id} className="border-t border-[var(--border)]">
+                    <td className="px-2 py-2">
+                      <div className="font-medium">{task.title}</div>
+                      <div className="text-xs text-[var(--muted)]">{task.status.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())} | due {task.due_date || "-"}</div>
+                    </td>
+                    {data.people.map((person: any) => (
+                      <td key={`p-${person.id}`} className="px-2 py-2 text-center font-medium">
+                        {task.role_by_person?.[String(person.id)] || <span className="text-[var(--muted)]">-</span>}
+                      </td>
+                    ))}
+                    {(data.teams || []).map((team: any) => (
+                      <td key={`t-${team.id}`} className="px-2 py-2 text-center font-medium text-[var(--muted)]">
+                        {task.role_by_team?.[String(team.id)] || "-"}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              }
+              return rows;
+            })()}
           </tbody>
         </table>
       </div>

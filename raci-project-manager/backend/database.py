@@ -38,6 +38,14 @@ CREATE TABLE IF NOT EXISTS project_people (
     PRIMARY KEY (project_id, person_id)
 );
 
+CREATE TABLE IF NOT EXISTS task_groups (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id  INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    name        TEXT NOT NULL,
+    order_index INTEGER NOT NULL DEFAULT 0,
+    created_at  TEXT DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS tasks (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     project_id  INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -55,6 +63,22 @@ CREATE TABLE IF NOT EXISTS task_assignments (
     role        TEXT NOT NULL,
     created_at  TEXT DEFAULT (datetime('now')),
     PRIMARY KEY (task_id, person_id, role)
+);
+
+CREATE TABLE IF NOT EXISTS teams (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id  INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    name        TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    created_at  TEXT DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS team_task_assignments (
+    task_id     INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+    team_id     INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    role        TEXT NOT NULL,
+    created_at  TEXT DEFAULT (datetime('now')),
+    PRIMARY KEY (task_id, team_id, role)
 );
 
 CREATE TABLE IF NOT EXISTS share_tokens (
@@ -80,6 +104,15 @@ def create_tables() -> None:
     conn = get_db()
     conn.executescript(DDL)
     conn.commit()
+    # Additive migration — safe to re-run on existing DBs
+    for migration in [
+        "ALTER TABLE tasks ADD COLUMN group_id INTEGER REFERENCES task_groups(id)",
+    ]:
+        try:
+            conn.execute(migration)
+            conn.commit()
+        except Exception:
+            pass  # column already exists
     conn.close()
 
 
@@ -91,11 +124,15 @@ def _touch_project(conn: sqlite3.Connection, project_id: int) -> None:
     conn.execute("UPDATE projects SET updated_at = datetime('now') WHERE id = ?", (project_id,))
 
 
+# ---------------------------------------------------------------------------
+# Projects
+# ---------------------------------------------------------------------------
+
 def list_projects() -> list[dict[str, Any]]:
     conn = get_db()
     rows = conn.execute(
         """
-        SELECT p.*, 
+        SELECT p.*,
                (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id) AS task_count,
                (SELECT COUNT(*) FROM project_people pp WHERE pp.project_id = p.id) AS people_count
         FROM projects p
@@ -161,11 +198,77 @@ def delete_project(project_id: int) -> bool:
     return cur.rowcount > 0
 
 
+# ---------------------------------------------------------------------------
+# Task Groups
+# ---------------------------------------------------------------------------
+
+def list_task_groups(project_id: int) -> list[dict[str, Any]]:
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM task_groups WHERE project_id = ? ORDER BY order_index ASC, id ASC",
+        (project_id,),
+    ).fetchall()
+    conn.close()
+    return _dicts(rows)
+
+
+def create_task_group(project_id: int, name: str) -> dict[str, Any]:
+    conn = get_db()
+    order = conn.execute(
+        "SELECT COALESCE(MAX(order_index), -1) + 1 FROM task_groups WHERE project_id = ?",
+        (project_id,),
+    ).fetchone()[0]
+    cur = conn.execute(
+        "INSERT INTO task_groups (project_id, name, order_index) VALUES (?, ?, ?)",
+        (project_id, name.strip(), order),
+    )
+    conn.commit()
+    row = conn.execute("SELECT * FROM task_groups WHERE id = ?", (cur.lastrowid,)).fetchone()
+    conn.close()
+    return dict(row)
+
+
+def update_task_group(
+    project_id: int, group_id: int, name: str | None, order_index: int | None
+) -> dict[str, Any] | None:
+    conn = get_db()
+    current = conn.execute(
+        "SELECT * FROM task_groups WHERE id = ? AND project_id = ?", (group_id, project_id)
+    ).fetchone()
+    if current is None:
+        conn.close()
+        return None
+    next_name = name.strip() if name is not None else current["name"]
+    next_order = order_index if order_index is not None else current["order_index"]
+    conn.execute(
+        "UPDATE task_groups SET name = ?, order_index = ? WHERE id = ?",
+        (next_name, next_order, group_id),
+    )
+    conn.commit()
+    row = conn.execute("SELECT * FROM task_groups WHERE id = ?", (group_id,)).fetchone()
+    conn.close()
+    return dict(row)
+
+
+def delete_task_group(project_id: int, group_id: int) -> bool:
+    conn = get_db()
+    cur = conn.execute(
+        "DELETE FROM task_groups WHERE id = ? AND project_id = ?", (group_id, project_id)
+    )
+    conn.commit()
+    conn.close()
+    return cur.rowcount > 0
+
+
+# ---------------------------------------------------------------------------
+# People
+# ---------------------------------------------------------------------------
+
 def list_project_people(project_id: int) -> list[dict[str, Any]]:
     conn = get_db()
     rows = conn.execute(
         """
-        SELECT pe.*, 
+        SELECT pe.*,
                (SELECT COUNT(*)
                 FROM task_assignments ta
                 JOIN tasks t ON t.id = ta.task_id
@@ -244,25 +347,78 @@ def remove_project_person(project_id: int, person_id: int) -> bool:
     return cur.rowcount > 0
 
 
-def list_tasks(project_id: int) -> list[dict[str, Any]]:
+# ---------------------------------------------------------------------------
+# Teams
+# ---------------------------------------------------------------------------
+
+def list_project_teams(project_id: int) -> list[dict[str, Any]]:
     conn = get_db()
     rows = conn.execute(
-        "SELECT * FROM tasks WHERE project_id = ? ORDER BY due_date IS NULL, due_date ASC, created_at ASC",
+        "SELECT * FROM teams WHERE project_id = ? ORDER BY name COLLATE NOCASE",
         (project_id,),
     ).fetchall()
     conn.close()
     return _dicts(rows)
 
 
-def create_task(project_id: int, title: str, description: str, status: str, due_date: str | None) -> dict[str, Any]:
+def create_team(project_id: int, name: str, description: str = "") -> dict[str, Any]:
+    conn = get_db()
+    cur = conn.execute(
+        "INSERT INTO teams (project_id, name, description) VALUES (?, ?, ?)",
+        (project_id, name.strip(), description.strip()),
+    )
+    conn.commit()
+    row = conn.execute("SELECT * FROM teams WHERE id = ?", (cur.lastrowid,)).fetchone()
+    conn.close()
+    return dict(row)
+
+
+def delete_team(project_id: int, team_id: int) -> bool:
+    conn = get_db()
+    cur = conn.execute(
+        "DELETE FROM teams WHERE id = ? AND project_id = ?", (team_id, project_id)
+    )
+    conn.commit()
+    conn.close()
+    return cur.rowcount > 0
+
+
+# ---------------------------------------------------------------------------
+# Tasks
+# ---------------------------------------------------------------------------
+
+def list_tasks(project_id: int) -> list[dict[str, Any]]:
+    conn = get_db()
+    rows = conn.execute(
+        """
+        SELECT t.*, tg.name AS group_name, tg.order_index AS group_order
+        FROM tasks t
+        LEFT JOIN task_groups tg ON tg.id = t.group_id
+        WHERE t.project_id = ?
+        ORDER BY (tg.order_index IS NULL), tg.order_index ASC, tg.id ASC, t.created_at ASC
+        """,
+        (project_id,),
+    ).fetchall()
+    conn.close()
+    return _dicts(rows)
+
+
+def create_task(
+    project_id: int,
+    title: str,
+    description: str,
+    status: str,
+    due_date: str | None,
+    group_id: int | None = None,
+) -> dict[str, Any]:
     status = status if status in VALID_STATUSES else "not_started"
     conn = get_db()
     cur = conn.execute(
         """
-        INSERT INTO tasks (project_id, title, description, status, due_date)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO tasks (project_id, title, description, status, due_date, group_id)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (project_id, title.strip(), description.strip(), status, due_date),
+        (project_id, title.strip(), description.strip(), status, due_date, group_id),
     )
     _touch_project(conn, project_id)
     conn.commit()
@@ -285,6 +441,8 @@ def update_task(
     description: str | None,
     status: str | None,
     due_date: str | None,
+    group_id: int | None = None,
+    clear_group: bool = False,
 ) -> dict[str, Any] | None:
     conn = get_db()
     current = conn.execute(
@@ -298,14 +456,20 @@ def update_task(
     next_title = title.strip() if title is not None else current["title"]
     next_description = description.strip() if description is not None else current["description"]
     next_due = due_date if due_date is not None else current["due_date"]
+    if clear_group:
+        next_group = None
+    elif group_id is not None:
+        next_group = group_id
+    else:
+        next_group = current["group_id"]
 
     conn.execute(
         """
         UPDATE tasks
-        SET title = ?, description = ?, status = ?, due_date = ?, updated_at = datetime('now')
+        SET title = ?, description = ?, status = ?, due_date = ?, group_id = ?, updated_at = datetime('now')
         WHERE id = ?
         """,
-        (next_title, next_description, next_status, next_due, task_id),
+        (next_title, next_description, next_status, next_due, next_group, task_id),
     )
     _touch_project(conn, project_id)
     conn.commit()
@@ -323,6 +487,10 @@ def delete_task(project_id: int, task_id: int) -> bool:
     return cur.rowcount > 0
 
 
+# ---------------------------------------------------------------------------
+# Assignments
+# ---------------------------------------------------------------------------
+
 def get_task_assignments(task_id: int) -> list[dict[str, Any]]:
     conn = get_db()
     rows = conn.execute(
@@ -339,7 +507,33 @@ def get_task_assignments(task_id: int) -> list[dict[str, Any]]:
     return _dicts(rows)
 
 
+def get_team_task_assignments(task_id: int) -> list[dict[str, Any]]:
+    conn = get_db()
+    rows = conn.execute(
+        """
+        SELECT tta.task_id, tta.team_id, tta.role, tm.name, tm.description
+        FROM team_task_assignments tta
+        JOIN teams tm ON tm.id = tta.team_id
+        WHERE tta.task_id = ?
+        ORDER BY tm.name COLLATE NOCASE, tta.role
+        """,
+        (task_id,),
+    ).fetchall()
+    conn.close()
+    return _dicts(rows)
+
+
 def set_task_assignments(project_id: int, task_id: int, assignments: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Legacy: person-only assignments. Preserved for backward compat."""
+    return set_task_assignments_v2(project_id, task_id, assignments, [])
+
+
+def set_task_assignments_v2(
+    project_id: int,
+    task_id: int,
+    person_assignments: list[dict[str, Any]],
+    team_assignments: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     conn = get_db()
     task = conn.execute(
         "SELECT id FROM tasks WHERE id = ? AND project_id = ?", (task_id, project_id)
@@ -348,10 +542,11 @@ def set_task_assignments(project_id: int, task_id: int, assignments: list[dict[s
         conn.close()
         raise ValueError("Task not found")
 
-    seen: set[tuple[int, str]] = set()
-    normalized: list[tuple[int, str]] = []
+    # Validate person assignments
+    seen_person: set[tuple[int, str]] = set()
+    normalized_persons: list[tuple[int, str]] = []
     a_count = 0
-    for item in assignments:
+    for item in person_assignments:
         person_id = int(item["person_id"])
         role = str(item["role"]).upper()
         if role not in VALID_ROLES:
@@ -361,11 +556,35 @@ def set_task_assignments(project_id: int, task_id: int, assignments: list[dict[s
             conn.close()
             raise ValueError(f"Person {person_id} is not a project member")
         key = (person_id, role)
-        if key in seen:
+        if key in seen_person:
             conn.close()
             raise ValueError("Duplicate assignment for same person and role")
-        seen.add(key)
-        normalized.append(key)
+        seen_person.add(key)
+        normalized_persons.append(key)
+        if role == "A":
+            a_count += 1
+
+    # Validate team assignments
+    seen_team: set[tuple[int, str]] = set()
+    normalized_teams: list[tuple[int, str]] = []
+    for item in team_assignments:
+        team_id = int(item["team_id"])
+        role = str(item["role"]).upper()
+        if role not in VALID_ROLES:
+            conn.close()
+            raise ValueError(f"Invalid role: {role}")
+        team_exists = conn.execute(
+            "SELECT id FROM teams WHERE id = ? AND project_id = ?", (team_id, project_id)
+        ).fetchone()
+        if team_exists is None:
+            conn.close()
+            raise ValueError(f"Team {team_id} is not in this project")
+        key = (team_id, role)
+        if key in seen_team:
+            conn.close()
+            raise ValueError("Duplicate assignment for same team and role")
+        seen_team.add(key)
+        normalized_teams.append(key)
         if role == "A":
             a_count += 1
 
@@ -374,10 +593,16 @@ def set_task_assignments(project_id: int, task_id: int, assignments: list[dict[s
         raise ValueError("Each task must have exactly one Accountable (A)")
 
     conn.execute("DELETE FROM task_assignments WHERE task_id = ?", (task_id,))
-    for person_id, role in normalized:
+    for person_id, role in normalized_persons:
         conn.execute(
             "INSERT INTO task_assignments (task_id, person_id, role) VALUES (?, ?, ?)",
             (task_id, person_id, role),
+        )
+    conn.execute("DELETE FROM team_task_assignments WHERE task_id = ?", (task_id,))
+    for team_id, role in normalized_teams:
+        conn.execute(
+            "INSERT INTO team_task_assignments (task_id, team_id, role) VALUES (?, ?, ?)",
+            (task_id, team_id, role),
         )
     _touch_project(conn, project_id)
     conn.commit()
@@ -385,16 +610,24 @@ def set_task_assignments(project_id: int, task_id: int, assignments: list[dict[s
     return get_task_assignments(task_id)
 
 
+# ---------------------------------------------------------------------------
+# Matrix
+# ---------------------------------------------------------------------------
+
 def build_matrix(project_id: int) -> dict[str, Any] | None:
     project = get_project(project_id)
     if project is None:
         return None
 
     people = list_project_people(project_id)
+    teams = list_project_teams(project_id)
+    groups = list_task_groups(project_id)
     tasks = list_tasks(project_id)
 
     task_ids = [t["id"] for t in tasks]
-    assignments_by_task: dict[int, list[dict[str, Any]]] = {task_id: [] for task_id in task_ids}
+    assignments_by_task: dict[int, list[dict[str, Any]]] = {tid: [] for tid in task_ids}
+    team_assignments_by_task: dict[int, list[dict[str, Any]]] = {tid: [] for tid in task_ids}
+
     if task_ids:
         placeholders = ",".join(["?"] * len(task_ids))
         conn = get_db()
@@ -408,40 +641,67 @@ def build_matrix(project_id: int) -> dict[str, Any] | None:
             """,
             tuple(task_ids),
         ).fetchall()
-        conn.close()
         for row in rows:
             assignments_by_task[row["task_id"]].append(dict(row))
+
+        team_rows = conn.execute(
+            f"""
+            SELECT tta.task_id, tta.team_id, tta.role, tm.name
+            FROM team_task_assignments tta
+            JOIN teams tm ON tm.id = tta.team_id
+            WHERE tta.task_id IN ({placeholders})
+            ORDER BY tta.task_id, tm.name COLLATE NOCASE, tta.role
+            """,
+            tuple(task_ids),
+        ).fetchall()
+        conn.close()
+        for row in team_rows:
+            team_assignments_by_task[row["task_id"]].append(dict(row))
 
     matrix_rows = []
     for task in tasks:
         assignments = assignments_by_task.get(task["id"], [])
+        team_assignments = team_assignments_by_task.get(task["id"], [])
         role_by_person: dict[str, str] = {}
-        for assignment in assignments:
-            key = str(assignment["person_id"])
+        for a in assignments:
+            key = str(a["person_id"])
             existing = role_by_person.get(key)
-            role_by_person[key] = assignment["role"] if not existing else f"{existing}/{assignment['role']}"
+            role_by_person[key] = a["role"] if not existing else f"{existing}/{a['role']}"
+        role_by_team: dict[str, str] = {}
+        for a in team_assignments:
+            key = str(a["team_id"])
+            existing = role_by_team.get(key)
+            role_by_team[key] = a["role"] if not existing else f"{existing}/{a['role']}"
         matrix_rows.append(
             {
                 **task,
                 "assignments": assignments,
+                "team_assignments": team_assignments,
                 "role_by_person": role_by_person,
-                "accountable_count": sum(1 for a in assignments if a["role"] == "A"),
+                "role_by_team": role_by_team,
+                "accountable_count": (
+                    sum(1 for a in assignments if a["role"] == "A")
+                    + sum(1 for a in team_assignments if a["role"] == "A")
+                ),
             }
         )
 
     return {
         "project": project,
         "people": people,
+        "teams": teams,
+        "groups": groups,
         "tasks": matrix_rows,
     }
 
 
+# ---------------------------------------------------------------------------
+# Digest & Alerts
+# ---------------------------------------------------------------------------
+
 def get_due_digest(project_id: int, window: str = "week") -> dict[str, Any]:
     start = date.today()
-    if window == "week":
-        end = start + timedelta(days=6)
-    else:
-        end = start + timedelta(days=6)
+    end = start + timedelta(days=6)
 
     conn = get_db()
     rows = conn.execute(
@@ -488,10 +748,11 @@ def get_alerts(project_id: int) -> dict[str, Any]:
         raise ValueError("Project not found")
 
     missing_accountability = []
-    accountable_load: dict[int, dict[str, Any]] = {}
+    accountable_load: dict[str, dict[str, Any]] = {}
 
     for task in matrix["tasks"]:
-        a_assignments = [a for a in task["assignments"] if a["role"] == "A"]
+        all_assignments = task["assignments"] + task["team_assignments"]
+        a_assignments = [a for a in all_assignments if a["role"] == "A"]
         if len(a_assignments) == 0:
             missing_accountability.append(
                 {
@@ -501,15 +762,21 @@ def get_alerts(project_id: int) -> dict[str, Any]:
                 }
             )
 
-        for a in a_assignments:
-            person_id = int(a["person_id"])
-            if person_id not in accountable_load:
-                accountable_load[person_id] = {
-                    "person_id": person_id,
-                    "name": a["name"],
-                    "task_ids": [],
-                }
-            accountable_load[person_id]["task_ids"].append(task["id"])
+        for a in task["assignments"]:
+            if a["role"] != "A":
+                continue
+            key = f"p:{a['person_id']}"
+            if key not in accountable_load:
+                accountable_load[key] = {"key": key, "name": a["name"], "task_ids": []}
+            accountable_load[key]["task_ids"].append(task["id"])
+
+        for a in task["team_assignments"]:
+            if a["role"] != "A":
+                continue
+            key = f"t:{a['team_id']}"
+            if key not in accountable_load:
+                accountable_load[key] = {"key": key, "name": a["name"] + " (team)", "task_ids": []}
+            accountable_load[key]["task_ids"].append(task["id"])
 
     overloaded_owners = []
     for owner in accountable_load.values():
@@ -527,32 +794,45 @@ def get_alerts(project_id: int) -> dict[str, Any]:
     }
 
 
+# ---------------------------------------------------------------------------
+# Export
+# ---------------------------------------------------------------------------
+
 def export_project_csv(project_id: int) -> str:
     matrix = build_matrix(project_id)
     if matrix is None:
         raise ValueError("Project not found")
 
     people = matrix["people"]
-    role_headers = [f"{p['name']} ({p['id']})" for p in people]
+    teams = matrix["teams"]
+    person_headers = [f"{p['name']} ({p['id']})" for p in people]
+    team_headers = [f"{t['name']} (team:{t['id']})" for t in teams]
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["task_id", "title", "status", "due_date", "description", *role_headers])
+    writer.writerow(["task_id", "title", "group", "status", "due_date", "description", *person_headers, *team_headers])
 
     for task in matrix["tasks"]:
         row = [
             task["id"],
             task["title"],
+            task.get("group_name") or "",
             task["status"],
             task["due_date"] or "",
             task["description"] or "",
         ]
         for person in people:
             row.append(task["role_by_person"].get(str(person["id"]), ""))
+        for team in teams:
+            row.append(task["role_by_team"].get(str(team["id"]), ""))
         writer.writerow(row)
 
     return output.getvalue()
 
+
+# ---------------------------------------------------------------------------
+# Share Tokens
+# ---------------------------------------------------------------------------
 
 def create_share_token(project_id: int, label: str = "") -> dict[str, Any]:
     token = secrets.token_urlsafe(20)
@@ -613,6 +893,8 @@ def get_shared_project(token: str) -> dict[str, Any] | None:
         "share": dict(row),
         "project": matrix["project"],
         "people": matrix["people"],
+        "teams": matrix["teams"],
+        "groups": matrix["groups"],
         "tasks": matrix["tasks"],
         "digest": digest,
         "alerts": alerts,
