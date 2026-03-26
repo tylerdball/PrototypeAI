@@ -1,0 +1,197 @@
+[
+  {
+    "id": "fd1b0bf3-5af3-473f-b30b-19bb8bc79e15",
+    "type": "single",
+    "title": "Admin area for claude console.  A ui to be able to",
+    "overall_score": 5.15,
+    "overall_delta": null,
+    "created_at": "2026-03-26T22:52:46.189450+00:00",
+    "result": {
+      "heuristics": [
+        {
+          "id": 1,
+          "name": "Visibility of System Status",
+          "score": 5.5,
+          "severity": "warning",
+          "findings": [
+            "The 'Last used at' column shows a dash (\u2014) for the 'ai-prototypes-key', providing no meaningful status information \u2014 users cannot tell if the key has never been used or if data is unavailable.",
+            "The colored status dots next to workspace names (purple/lavender) have no legend or tooltip explaining what the color represents \u2014 users cannot determine if the key is active, inactive, or in some other state.",
+            "The cost column shows a progress-bar-like element (gray bar) whose meaning and scale are completely unexplained \u2014 there is no label, max value, or tooltip to interpret it.",
+            "No visible loading states or feedback indicators are present for any async operations like key creation or deletion."
+          ],
+          "suggestions": [
+            "Replace the dash in 'Last used at' with explicit text such as 'Never used' to clearly communicate the key's status.",
+            "Add a visible legend or tooltip to the colored status dots explaining what each color means (e.g., green = active, red = revoked, gray = inactive).",
+            "Either replace the gray bar in the Cost column with a plain numeric value and currency, or add a tooltip explaining the bar's scale and what it represents.",
+            "Implement visible loading spinners or skeleton states when API key data is being fetched or after actions like key creation."
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Match Between System and the Real World",
+          "score": 6.5,
+          "severity": "warning",
+          "findings": [
+            "The term 'sk-ant-api03-...' is raw technical jargon displayed directly to users without explanation \u2014 non-developer users may not understand what this prefix means.",
+            "The 'Cost' column header has a tooltip icon (\u24d8) but cost is shown alongside unexplained gray bar visualizations, creating a mismatch between the familiar concept of cost and the unfamiliar visual representation.",
+            "Navigation uses section headers like 'CLAUDE CODE' and 'MANAGE' which are internal product terminology and may not map to users' mental models of account management tasks.",
+            "The description 'API keys are owned by workspaces and remain active even after the creator is removed' uses passive, system-oriented language that may confuse non-technical admins about ownership semantics."
+          ],
+          "suggestions": [
+            "Add a brief inline label or tooltip next to truncated API key strings explaining the format (e.g., 'API Key ID \u2014 click to copy full value').",
+            "Replace or supplement the gray cost bar with a plain dollar amount and percentage-of-budget context so it matches users' real-world understanding of spending.",
+            "Rename navigation sections to user-task-oriented labels (e.g., 'CLAUDE CODE' \u2192 'Code Settings', 'MANAGE' \u2192 'Account Management').",
+            "Rewrite the informational banner in plain language: e.g., 'API keys belong to workspaces, not individuals. They stay active even if the person who created them leaves the organization.'"
+          ]
+        },
+        {
+          "id": 3,
+          "name": "User Control and Freedom",
+          "score": 5,
+          "severity": "warning",
+          "findings": [
+            "The three-dot (\u22ee) overflow menu on each API key row likely contains destructive actions (e.g., delete/revoke), but no confirmation step or undo mechanism is visible in the interface.",
+            "There is no visible 'undo' or 'restore' capability for deleted or revoked API keys \u2014 revoking a key used in production could be catastrophic and irreversible.",
+            "The '+ Create Key' button has no visible cancel flow or escape mechanism shown in the current view, creating uncertainty about how to abort key creation.",
+            "No breadcrumb trail or back navigation is visible in the content area, limiting users' ability to understand where they are and retrace steps."
+          ],
+          "suggestions": [
+            "Add a confirmation modal before any destructive action (delete/revoke) in the overflow menu, clearly stating the consequence (e.g., 'Revoking this key will immediately break any integrations using it. This cannot be undone.').",
+            "Consider a soft-delete or 'disable' state before permanent revocation, giving users a window to recover from mistakes.",
+            "Ensure the key creation flow includes a clearly visible Cancel button and that pressing Escape closes any modal.",
+            "Add breadcrumbs in the content area (e.g., 'Organization > API Keys') to help users orient themselves and navigate back."
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Consistency and Standards",
+          "score": 6,
+          "severity": "warning",
+          "findings": [
+            "The left sidebar contains two separate sections ('ANALYTICS > API keys' under Manage, and 'API keys' under the middle panel navigation) creating duplicate, ambiguous navigation paths to the same or similar content.",
+            "Navigation items in the middle panel (Profile, Appearance, Organization, etc.) use orange/amber text color for unselected items, while the left sidebar uses standard dark text \u2014 inconsistent visual treatment of navigation.",
+            "The 'Created at' column header has a sort indicator (\u2228) but no other column shows sort affordance, creating inconsistency in table interaction expectations.",
+            "The cost display is inconsistent: one key shows '\u2014', another shows '$0.07', and another shows '$0.00' \u2014 the dash for no cost is inconsistent with showing '$0.00' for zero cost."
+          ],
+          "suggestions": [
+            "Consolidate the duplicate API Keys navigation into a single access point \u2014 remove the redundancy between the left sidebar 'Manage > API keys' and the middle panel's 'API keys' link.",
+            "Standardize navigation text colors across both the sidebar and the middle panel so selected vs. unselected states use the same visual language throughout.",
+            "Make all sortable columns visually consistent by showing sort icons on all headers that support sorting, or remove the sort indicator from 'Created at' if it's the only sortable column.",
+            "Use a consistent representation for cost: either always show a dollar amount ('$0.00' for zero, '$0.07' for usage) and eliminate the dash, or clearly label the dash as 'No data'."
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Error Prevention",
+          "score": 4.5,
+          "severity": "warning",
+          "findings": [
+            "Destructive actions (revoke/delete API key) appear to be accessible with a single click in the overflow menu with no apparent confirmation step visible in the current UI \u2014 high risk of accidental key deletion.",
+            "The '+ Create Key' flow shows no visible inline validation or constraints (e.g., naming rules, character limits) to prevent users from creating keys with invalid or duplicate names.",
+            "All three existing keys are assigned to 'Development Work' workspace, and no guardrail prevents creating a key with an identical or confusingly similar name (e.g., 'uncorked-prod-key' vs 'uncorked-api-key-dev').",
+            "The informational banner warns about keys remaining active after creator removal, but no proactive alert is shown when viewing keys whose creator is no longer in the organization."
+          ],
+          "suggestions": [
+            "Require a two-step confirmation for API key revocation/deletion: first click shows a confirmation dialog with the key name and impact, second click confirms the action.",
+            "Add inline validation during key creation for name format (allowed characters, length limits) and duplicate name detection before submission.",
+            "Implement a naming convention helper or template during key creation to help users create consistently named, non-confusing keys.",
+            "Add a visual warning indicator on rows where the creator's account status may be at risk (e.g., a flag icon with tooltip: 'Creator account is inactive')."
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Recognition Rather Than Recall",
+          "score": 5.5,
+          "severity": "warning",
+          "findings": [
+            "The truncated API key values (e.g., 'sk-ant-api03-ayY...WgAA') are not copyable via an obvious affordance \u2014 users must remember or manually select the text to copy a key they need elsewhere.",
+            "The gray cost bars have no scale reference, requiring users to memorize or infer what 'full bar' means in dollar terms \u2014 contextual reference is absent.",
+            "The colored workspace status dots provide no inline explanation of their meaning, forcing users to recall or guess their significance each time they view the table.",
+            "The overflow menu (\u22ee) hides available actions, forcing users to recall that additional options exist rather than recognizing them at a glance."
+          ],
+          "suggestions": [
+            "Add a visible copy icon next to each truncated API key that copies the full key to clipboard with a confirmation tooltip ('Copied!').",
+            "Add a scale indicator or tooltip to the cost bars showing the maximum spend limit so users can interpret the bar's relative value without needing external context.",
+            "Replace or supplement the colored status dots with a text badge (e.g., 'Active', 'Inactive') directly visible in the table row.",
+            "Consider expanding the most common actions (e.g., Copy Key, Revoke) as visible icon buttons on each row, reserving the overflow menu for secondary actions."
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Flexibility and Efficiency of Use",
+          "score": 4,
+          "severity": "warning",
+          "findings": [
+            "There is no bulk action capability \u2014 users managing many API keys cannot select multiple keys to revoke, move to workspace, or delete in batch.",
+            "No keyboard shortcuts are present or documented for power users who frequently manage API keys programmatically or at scale.",
+            "The table has no filtering or search functionality visible, meaning users with many API keys must manually scan to find a specific one.",
+            "The '+ Create Key' flow does not appear to support templates or duplication of existing keys, requiring users to re-enter configuration for similar keys each time."
+          ],
+          "suggestions": [
+            "Add checkboxes to table rows to enable bulk selection and batch operations (e.g., 'Revoke Selected', 'Move to Workspace').",
+            "Implement a search/filter bar above the table to allow users to filter keys by name, workspace, creator, or date range.",
+            "Add a 'Duplicate Key' option in the overflow menu so users can quickly create similar keys without starting from scratch.",
+            "Document and implement keyboard shortcuts for common admin actions (e.g., N for new key, / for search) and make them discoverable via a keyboard shortcut reference."
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Aesthetic and Minimalist Design",
+          "score": 6.5,
+          "severity": "warning",
+          "findings": [
+            "The interface has two navigation panels side-by-side (left sidebar + middle settings menu), which adds visual complexity and takes up significant horizontal real estate on the content area.",
+            "The 'Created by' column shows both the name ('Tyler Ball') and email ('tylerdball@gmail.com') for all three rows \u2014 since all keys are created by the same user, the email adds redundancy and visual noise.",
+            "The count badge '3' next to 'API keys' in the header is low-value information for a page that already shows exactly 3 rows.",
+            "The gray cost progress bars are visual elements whose purpose is unclear \u2014 they may be adding visual complexity without meaningful informational value."
+          ],
+          "suggestions": [
+            "Consider collapsing or eliminating the middle settings navigation panel by integrating those links into the left sidebar, freeing up horizontal space for content.",
+            "Show the creator email only in a tooltip on hover rather than always visible in the table, reducing row density while keeping the information accessible.",
+            "Remove the count badge from the page header since it's redundant with the visible table rows; reserve count badges for navigation items in the sidebar.",
+            "Replace the unexplained cost bars with plain numeric cost values; if a visual spending indicator is needed, use it only with proper labels and scale."
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Help Users Recognize, Diagnose, and Recover From Errors",
+          "score": 3,
+          "severity": "critical",
+          "findings": [
+            "No error states are visible in the current UI \u2014 it is unclear what happens when an API key operation fails (creation, revocation, etc.) and how errors are surfaced to the user.",
+            "The UI provides no visible validation feedback \u2014 if a user attempts to create a key with an invalid name or duplicate identifier, the error handling behavior is not demonstrated or hinted at.",
+            "The informational banner at the top of the page serves as a warning but is styled as neutral informational text (orange links, no warning icon), which may cause users to overlook it.",
+            "No contextual error recovery paths are visible \u2014 if a key is accidentally revoked, there is no apparent way to recover or get help."
+          ],
+          "suggestions": [
+            "Design and implement clear toast notifications or inline error messages for failed operations, written in plain language (e.g., 'We couldn't revoke this key. Please try again, or contact support if the problem continues.').",
+            "Add inline form validation with specific, actionable error messages during key creation (e.g., 'Key name can only contain letters, numbers, and hyphens').",
+            "Restyle the informational warning banner with a distinct warning icon and yellow/amber background to ensure it draws appropriate attention.",
+            "Add a support link or 'Undo' toast notification that appears immediately after a destructive action, giving users a brief window (e.g., 5 seconds) to reverse the operation."
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Help and Documentation",
+          "score": 5,
+          "severity": "warning",
+          "findings": [
+            "The only visible help affordance is the tooltip icon (\u24d8) on the 'Cost' column header \u2014 no other contextual help is present on the page for other complex concepts.",
+            "The informational banner explains key ownership but does not link to more detailed documentation about API key security best practices or workspace management.",
+            "There is a 'Documentation' link in the left sidebar, but it is at the very bottom and not contextually linked to the specific API keys feature being viewed.",
+            "No onboarding or first-time-use guidance is visible \u2014 new users creating their first API key receive no contextual tips or best-practice suggestions."
+          ],
+          "suggestions": [
+            "Add contextual help tooltips (\u24d8) or inline help text to other complex column headers and concepts such as 'Workspace', 'Last used at', and the status dots.",
+            "Link the informational banner to a specific documentation page about API key security best practices and workspace ownership.",
+            "Make the Documentation link context-aware \u2014 when viewing the API Keys page, link directly to the API Keys section of the docs rather than the documentation home.",
+            "Add a dismissible first-run guidance panel for new users that explains the key management workflow, naming conventions, and security recommendations in 3-4 bullet points."
+          ]
+        }
+      ],
+      "overall_score": 5.15,
+      "summary": "The experience scores a below-average 5.2/10, with critical failures in keeping users informed of what's happening, using familiar real-world language and conventions, and giving users the ability to undo or navigate freely.",
+      "generated_at": "2026-03-26T22:52:35.052497Z"
+    }
+  }
+]

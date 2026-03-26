@@ -102,8 +102,8 @@ RAG over your campaign notes so you can ask "what did the party promise the blac
 | 1 | API Governance Dashboard | Not started |
 | 3 | ADR Tracker | Not started |
 | 4 | Data Platform Observability Dashboard | ✅ Complete — `data-platform-observability/` |
-| 5 | Synthetic Data Generator | Not started |
-| 6 | AI UX Review Tool | Not started |
+| 5 | Synthetic Data Generator | ✅ Complete — `synthetic-data-generator/` |
+| 6 | AI UX Review Tool | ✅ Complete — `ai-ux-review/` |
 | 7 | Personal Interest Tracker | Not started |
 | 8 | D&D Campaign AI Assistant | ✅ Complete — `dnd-assistant/` |
 | 9 | MCP Server Explorer & Learning Tool | ✅ Complete — `mcp-explorer/` |

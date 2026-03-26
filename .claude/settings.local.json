@@ -26,7 +26,10 @@
       "Bash(command -v py.exe)",
       "Bash(py --version)",
       "Bash(py -m pip install -r \"E:/Projects/PrototypeAI/synthetic-data-generator/requirements.txt\" -q)",
-      "Bash(py -m pytest tests/ -v)"
+      "Bash(py -m pytest tests/ -v)",
+      "Bash(py -c \":*)",
+      "Bash(py -m pip install -r \"E:/Projects/PrototypeAI/ai-ux-review/requirements.txt\" -q)",
+      "Bash(py:*)"
     ]
   }
 }

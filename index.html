@@ -268,6 +268,34 @@
           </div></td>
         </tr>
 
+        <tr>
+          <td><span class="dot-done"></span></td>
+          <td>
+            <div class="proto-name">Synthetic Data Generator</div>
+            <div class="proto-dir">synthetic-data-generator/</div>
+          </td>
+          <td><p class="proto-desc">Define a schema, generate N rows of realistic synthetic data. Persona mode for richly-correlated user profiles. CSV/JSON export with streaming support.</p></td>
+          <td><div class="tags"><span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">NumPy</span><span class="tag">Ollama</span></div></td>
+          <td><div class="ports">
+            <a class="port-link" href="http://localhost:3006" target="_blank">:3006</a>
+            <a class="port-link" href="http://localhost:8006/docs" target="_blank">API :8006</a>
+          </div></td>
+        </tr>
+
+        <tr>
+          <td><span class="dot-done"></span></td>
+          <td>
+            <div class="proto-name">AI UX Review Tool</div>
+            <div class="proto-dir">ai-ux-review/</div>
+          </td>
+          <td><p class="proto-desc">Upload a UI screenshot or describe an interface. Returns a scored heuristic report across Nielsen's 10 principles with findings and suggestions. Before/after comparison mode.</p></td>
+          <td><div class="tags"><span class="tag">Next.js</span><span class="tag">FastAPI</span><span class="tag">Claude Vision</span><span class="tag">Ollama</span></div></td>
+          <td><div class="ports">
+            <a class="port-link" href="http://localhost:3007" target="_blank">:3007</a>
+            <a class="port-link" href="http://localhost:8007/docs" target="_blank">API :8007</a>
+          </div></td>
+        </tr>
+
       </tbody>
     </table>
 
@@ -297,16 +325,6 @@
           <td></td>
         </tr>
 
-        <tr class="planned">
-          <td><span class="dot-planned"></span></td>
-          <td>
-            <div class="proto-name">Synthetic Data Generator</div>
-            <div class="proto-dir">#5</div>
-          </td>
-          <td><p class="proto-desc">Define a schema, generate N rows of realistic synthetic data. Persona mode for user data. CSV/JSON export.</p></td>
-          <td><div class="tags"><span class="tag">FastAPI</span><span class="tag">Pydantic</span><span class="tag">Ollama</span></div></td>
-          <td></td>
-        </tr>
 
         <tr class="planned">
           <td><span class="dot-planned"></span></td>
@@ -353,7 +371,13 @@ cd raci-project-manager\backend  &amp;&amp;  uvicorn main:app --reload --port 80
 cd raci-project-manager\frontend &amp;&amp;  npm run dev
 
 cd data-platform-observability\backend  &amp;&amp;  uvicorn main:app --reload --port 8005
-cd data-platform-observability\frontend &amp;&amp;  npm run dev</pre>
+cd data-platform-observability\frontend &amp;&amp;  npm run dev
+
+cd synthetic-data-generator  &amp;&amp;  uvicorn main:app --reload --port 8006
+cd synthetic-data-generator\frontend &amp;&amp;  npm run dev
+
+cd ai-ux-review  &amp;&amp;  uvicorn main:app --reload --port 8007
+cd ai-ux-review\frontend &amp;&amp;  npm run dev</pre>
     </div>
   </div>
 </body>
