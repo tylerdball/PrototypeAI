@@ -56,12 +56,16 @@ Frontend opens at http://localhost:3007, API docs at http://localhost:8007/docs.
 
 ## API Endpoints
 
-| Method | Path          | Description                                                 |
-|--------|---------------|-------------------------------------------------------------|
-| GET    | `/health`     | Liveness check; returns provider config                     |
-| GET    | `/heuristics` | List all 10 Nielsen heuristics with descriptions            |
-| POST   | `/review`     | Analyze a single UI (image or description) against heuristics |
-| POST   | `/compare`    | Compare before/after versions and surface deltas            |
+| Method | Path                  | Description                                                 |
+|--------|-----------------------|-------------------------------------------------------------|
+| GET    | `/health`             | Liveness check; returns provider config                     |
+| GET    | `/heuristics`         | List all 10 Nielsen heuristics with descriptions            |
+| POST   | `/review`             | Analyze a single UI (image or description) against heuristics |
+| POST   | `/compare`            | Compare before/after versions and surface deltas            |
+| GET    | `/history`            | List saved analyses (summaries, no full result data)        |
+| POST   | `/history`            | Save an analysis result with auto-title and metadata        |
+| GET    | `/history/{id}`       | Retrieve a full saved analysis by ID                        |
+| DELETE | `/history/{id}`       | Delete a saved analysis                                     |
 
 ## Curl Examples
 
@@ -149,3 +153,9 @@ Quality will be lower than Claude for complex UIs, but it works offline.
 | 10 | Help and Documentation |
 
 Scores are 0–10 per heuristic. Severity bands: **ok** (7–10), **warning** (4–6.9), **critical** (0–3.9).
+
+## Frontend Features
+
+- **Light/dark mode** — toggle in the top bar; preference saved to `localStorage`
+- **Save results** — after any analysis, click Save in the result header to persist to `history.json`
+- **History drawer** — top bar History button (with count badge) opens a side drawer listing all saved analyses; click to restore, hover to delete
